@@ -139,16 +139,23 @@ function ScreenBackdrop() {
 ===================================================== */
 
 function VideoScreen({ video }) {
+  const [texture, setTexture] = useState(null);
+
   const textureRef = useRef(null);
-  const materialRef = useRef(null);
 
   const width = 12;
+
   const videoAspect = 848 / 478;
+
   const height = width / videoAspect;
 
   const bottom = 0.8;
+
   const centerY = bottom + height / 2;
 
+  /*
+   * Create the curved cinema screen geometry.
+   */
   const geometry = useMemo(() => {
     const geo = new THREE.PlaneGeometry(
       width,
@@ -158,69 +165,96 @@ function VideoScreen({ video }) {
     );
 
     const position = geo.attributes.position;
+
     const curve = 0.28;
 
     for (let i = 0; i < position.count; i++) {
       const x = position.getX(i);
-      const normalized = x / (width / 2);
-      const z = curve * (1 - normalized * normalized);
+
+      const normalized =
+        x / (width / 2);
+
+      const z =
+        curve *
+        (1 - normalized * normalized);
 
       position.setZ(i, z);
     }
 
     position.needsUpdate = true;
+
     geo.computeVertexNormals();
 
     return geo;
   }, []);
 
+  /*
+   * Create the THREE.VideoTexture.
+   */
   useEffect(() => {
     if (!video) {
+      console.log(
+        "VideoScreen: waiting for video"
+      );
+
       return;
-    }
-
-    console.log("Creating video texture:", video);
-
-    const texture = new THREE.VideoTexture(video);
-
-    texture.colorSpace = THREE.SRGBColorSpace;
-    texture.minFilter = THREE.LinearFilter;
-    texture.magFilter = THREE.LinearFilter;
-    texture.generateMipmaps = false;
-    texture.wrapS = THREE.ClampToEdgeWrapping;
-    texture.wrapT = THREE.ClampToEdgeWrapping;
-
-    textureRef.current = texture;
-
-    if (materialRef.current) {
-      materialRef.current.map = texture;
-      materialRef.current.needsUpdate = true;
     }
 
     console.log(
-      "Video texture created:",
-      texture
+      "VideoScreen: creating video texture"
     );
 
+    const videoTexture =
+      new THREE.VideoTexture(video);
+
+    videoTexture.colorSpace =
+      THREE.SRGBColorSpace;
+
+    videoTexture.minFilter =
+      THREE.LinearFilter;
+
+    videoTexture.magFilter =
+      THREE.LinearFilter;
+
+    videoTexture.generateMipmaps = false;
+
+    videoTexture.wrapS =
+      THREE.ClampToEdgeWrapping;
+
+    videoTexture.wrapT =
+      THREE.ClampToEdgeWrapping;
+
+    textureRef.current =
+      videoTexture;
+
+    setTexture(videoTexture);
+
     return () => {
-      texture.dispose();
+      videoTexture.dispose();
+
       textureRef.current = null;
+
+      setTexture(null);
     };
   }, [video]);
 
+  /*
+   * Update the video texture every frame.
+   */
   useFrame(() => {
-    if (!video || !textureRef.current) {
-      return;
-    }
-
     if (
-      video.readyState >=
-      HTMLMediaElement.HAVE_CURRENT_DATA
+      textureRef.current &&
+      video &&
+      !video.paused &&
+      !video.ended
     ) {
       textureRef.current.needsUpdate = true;
     }
   });
 
+  /*
+   * Clean geometry.
+   */
   useEffect(() => {
     return () => {
       geometry.dispose();
@@ -233,14 +267,22 @@ function VideoScreen({ video }) {
       position={[
         0,
         centerY,
-        0.85
+        0.18
       ]}
     >
-      <meshBasicMaterial
-        ref={materialRef}
-        side={THREE.DoubleSide}
-        toneMapped={false}
-      />
+      {texture ? (
+        <meshBasicMaterial
+          map={texture}
+          side={THREE.DoubleSide}
+          toneMapped={false}
+        />
+      ) : (
+        <meshBasicMaterial
+          color="#101010"
+          side={THREE.DoubleSide}
+          toneMapped={false}
+        />
+      )}
     </mesh>
   );
 }
@@ -468,7 +510,7 @@ function Speaker({ position }) {
     <group position={position}>
       <mesh>
         <boxGeometry
-          args={[0.45, 0.8, 0.85]}
+          args={[0.45, 0.8, 0.18]}
         />
 
         <meshStandardMaterial
