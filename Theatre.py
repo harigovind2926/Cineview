@@ -28,15 +28,32 @@ class Theatre:
             self.booked_seats[movie] = {}
 
             for show in self.shows:
-                self.available_seats[movie][show] = random.sample(self.all_seats, 15)
-                self.booked_seats[movie][show] = []
-                
-                for seat in self.available_seats[movie][show]:
-                    self.cursor.execute("INSERT INTO seats (movie, show, seat, status) VALUES (?, ?, ?, ?)",
-                (movie, show, seat, "available"))
+
+                self.cursor.execute("SELECT seat, status FROM seats WHERE movie = ? AND show = ?",
+                (movie, show))
+
+                seats = self.cursor.fetchall()
+
+                if seats:
+                    self.available_seats[movie][show] = []
+                    self.booked_seats[movie][show] = []
+
+                    for seat, status in seats:
+                        if status == "available":
+                            self.available_seats[movie][show].append(seat)
+
+                        elif status == "booked":
+                            self.booked_seats[movie][show].append(seat)
+
+                else:
+                    self.available_seats[movie][show] = random.sample(self.all_seats, 15)
+                    self.booked_seats[movie][show] = []
+
+                    for seat in self.available_seats[movie][show]:
+                        self.cursor.execute("INSERT INTO seats (movie, show, seat, status) VALUES (?, ?, ?, ?)",
+                    (movie, show, seat, "available"))
 
         self.conn.commit()
-
 
         print("______________________Welcome To Govind Theatres____________________________ ")
         print("\n")
@@ -102,6 +119,9 @@ class Theatre:
         for seat in selected_seats:
             self.booked_seats[Movie][show].append(seat)
             available_seats.remove(seat)
+
+            self.cursor.execute("UPDATE seats SET status = ? WHERE movie = ? AND show = ? AND seat = ?",("booked", Movie, show, seat))
+        self.conn.commit()    
 
 
         print("\nSelected Seats:", selected_seats)
