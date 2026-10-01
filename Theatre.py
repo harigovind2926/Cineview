@@ -1,9 +1,11 @@
 import random
 import sqlite3
+import os
 
 class Theatre:
     def __init__(self,Movies,Shows):
-        self.conn=sqlite3.connect("Theatre.db")
+        db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Theatre.db")
+        self.conn = sqlite3.connect(db_path)
         self.cursor=self.conn.cursor()
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS seats(movie TEXT,show TEXT,seat TEXT,status TEXT)""")
         self.conn.commit()
