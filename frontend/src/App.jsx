@@ -256,7 +256,7 @@ function ScreenBackdrop() {
 // VIDEO SCREEN
 // =====================================================
 
-function VideoScreen({ video }) {
+function VideoScreen({ video, isPlaying }) {
   const videoTexture = useMemo(() => {
     if (!video) {
       console.log("VideoScreen: no video");
@@ -283,6 +283,47 @@ function VideoScreen({ video }) {
 
     return texture;
   }, [video]);
+
+  const welcomeTexture = useMemo(() => {
+  if (isPlaying) {
+    return null;
+  }
+
+  const canvas = document.createElement("canvas");
+
+  canvas.width = 1200;
+  canvas.height = 675;
+
+  const ctx = canvas.getContext("2d");
+
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = "#111111";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
+  ctx.font = "bold 72px Arial";
+  ctx.fillText(
+    "GOVIND CINEMAS",
+    canvas.width / 2,
+    canvas.height / 2 - 45
+  );
+
+  ctx.font = "32px Arial";
+  ctx.fillStyle = "#bbbbbb";
+  ctx.fillText(
+    "Welcome to your cinematic experience",
+    canvas.width / 2,
+    canvas.height / 2 + 45
+  );
+
+  const texture = new THREE.CanvasTexture(canvas);
+
+  texture.colorSpace = THREE.SRGBColorSpace;
+
+  return texture;
+}, [isPlaying]);
 
   useFrame(() => {
     if (
@@ -341,7 +382,7 @@ function VideoScreen({ video }) {
       ]}
     >
       <meshBasicMaterial
-        map={videoTexture}
+        map={isPlaying ? videoTexture : welcomeTexture}
         side={THREE.DoubleSide}
         toneMapped={false}
       />
@@ -2406,6 +2447,7 @@ function App() {
           video={
             videoElement
           }
+          isPlaying={isPlaying}
         />
 
 
