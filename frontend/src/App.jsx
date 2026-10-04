@@ -1121,6 +1121,11 @@ function App() {
     setBookingMessage,
   ] = useState("");
 
+  const [
+  bookingDetails,
+  setBookingDetails,
+] = useState(null);
+
 
   // ===================================================
   // CONTROLS
@@ -1679,6 +1684,15 @@ function App() {
           `Seat ${selectedSeat.id} booked successfully!`
         );
 
+        
+        setBookingDetails({
+          theatre: "Govind Cinemas",
+          movie: selectedMovie,
+          show: selectedShow,
+          seats: [selectedSeat.id],
+          tickets: 1,
+        });
+
 
         // Refresh seat status
 
@@ -2192,6 +2206,108 @@ function App() {
       ========================================== */}
 
       {bookingMessage && (
+  <div
+    style={{
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      background: "rgba(0, 0, 0, 0.75)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      zIndex: 9999,
+    }}
+  >
+    <div
+      style={{
+        width: "360px",
+        padding: "30px",
+        background: "#111",
+        borderRadius: "16px",
+        border: "1px solid #333",
+        boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
+        color: "white",
+        textAlign: "center",
+      }}
+    >
+      <div
+        style={{
+          fontSize: "42px",
+          marginBottom: "10px",
+        }}
+      >
+        ✓
+      </div>
+
+      <h2
+        style={{
+          margin: "0 0 8px 0",
+          color: "#4caf50",
+        }}
+      >
+        BOOKING CONFIRMED
+      </h2>
+
+      <div
+        style={{
+          fontSize: "18px",
+          fontWeight: "bold",
+          marginBottom: "25px",
+        }}
+      >
+        {bookingDetails.theatre}
+      </div>
+
+      <div
+        style={{
+          textAlign: "left",
+          lineHeight: "2",
+          fontSize: "15px",
+        }}
+      >
+        <div>
+          <strong>Movie:</strong>{" "}
+          {bookingDetails.movie}
+        </div>
+
+        <div>
+          <strong>Show:</strong>{" "}
+          {bookingDetails.show}
+        </div>
+
+        <div>
+          <strong>Seats:</strong>{" "}
+          {bookingDetails.seats.join(", ")}
+        </div>
+
+        <div>
+          <strong>Tickets:</strong>{" "}
+          {bookingDetails.tickets}
+        </div>
+      </div>
+
+      <button
+        onClick={() => setBookingDetails(null)}
+        style={{
+          width: "100%",
+          marginTop: "25px",
+          padding: "12px",
+          border: "none",
+          borderRadius: "8px",
+          background: "#2196f3",
+          color: "white",
+          fontSize: "15px",
+          fontWeight: "bold",
+          cursor: "pointer",
+        }}
+      >
+        DONE
+      </button>
+    </div>
+  </div>
+)}
 
         <div
           style={{
@@ -2228,7 +2344,6 @@ function App() {
 
         </div>
 
-      )}
 
 
       {/* ==========================================
