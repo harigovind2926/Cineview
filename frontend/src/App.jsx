@@ -2330,7 +2330,10 @@ function App() {
       </div>
 
       <button
-        onClick={() => setBookingDetails(null)}
+        type="button"
+        onClick={() => {setBookingDetails(null);
+          setBookingMessage("");
+        }}
         style={{
           width: "100%",
           marginTop: "25px",
